@@ -8,6 +8,7 @@ import { config } from 'dotenv'
 import { UPLOAD_VIDEO_DIR } from './constants/dir'
 import { staticRoutes } from './routes/static.routes'
 import cors from 'cors'
+import tweetsRouters from './routes/tweets.routes'
 config()
 databaseService.connect().then(() => {
   databaseService.indexUsers()
@@ -25,6 +26,7 @@ initFolder()
 app.use(express.json())
 app.use('/users', usersRoutes)
 app.use('/medias', mediasRoutes)
+app.use('/tweets', tweetsRouters)
 app.use('/static', staticRoutes)
 app.use('/static/video', express.static(UPLOAD_VIDEO_DIR))
 app.use(defaultErrorHandler)
