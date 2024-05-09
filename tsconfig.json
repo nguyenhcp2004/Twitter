@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "NodeNext", // Quy định output module được sử dụng
     "moduleResolution": "NodeNext",
-    "target": "ES2022", // Target output cho code
+    "target": "ES2020", // Target output cho code
     "outDir": "dist", // Đường dẫn output cho thư mục build
     "esModuleInterop": true,
     "strict": true /* Enable all strict type-checking options. */,

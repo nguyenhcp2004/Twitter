@@ -42,6 +42,15 @@ router.post(
   validator.refreshTokenValidator,
   wrapRequestHandler(controller.logout)
 )
+
+/**
+ * Description: Refresh token
+ * Path: /refresh-token
+ * Method: POST
+ * Body: { refresh_token: string }
+ */
+router.post('/refresh-token', validator.refreshTokenValidator, wrapRequestHandler(controller.refreshToken))
+
 /**
  * Description: Verify email when user cclient click on the link in email
  * Path: /verify-email
