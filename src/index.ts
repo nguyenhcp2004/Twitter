@@ -9,6 +9,8 @@ import { UPLOAD_VIDEO_DIR } from './constants/dir'
 import { staticRoutes } from './routes/static.routes'
 import cors from 'cors'
 import tweetsRouters from './routes/tweets.routes'
+import bookmarksRouters from './routes/bookmarks.routes'
+import likesRouters from './routes/likes.routes'
 config()
 databaseService.connect().then(() => {
   databaseService.indexUsers()
@@ -27,6 +29,8 @@ app.use(express.json())
 app.use('/users', usersRoutes)
 app.use('/medias', mediasRoutes)
 app.use('/tweets', tweetsRouters)
+app.use('/bookmarks', bookmarksRouters)
+app.use('/likes', likesRouters)
 app.use('/static', staticRoutes)
 app.use('/static/video', express.static(UPLOAD_VIDEO_DIR))
 app.use(defaultErrorHandler)
