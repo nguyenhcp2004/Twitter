@@ -104,7 +104,8 @@ class UsersService {
         _id: user_id,
         email_verify_token: email_verify_token,
         date_of_birth: new Date(payload.date_of_birth),
-        password: hashPassword(payload.password)
+        password: hashPassword(payload.password),
+        username: `user${user_id}`
       })
     )
     const [access_token, refresh_token] = await this.signAccessAndRefreshToken({
