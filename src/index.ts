@@ -11,6 +11,7 @@ import cors from 'cors'
 import tweetsRouters from './routes/tweets.routes'
 import bookmarksRouters from './routes/bookmarks.routes'
 import likesRouters from './routes/likes.routes'
+
 config()
 databaseService.connect().then(() => {
   databaseService.indexUsers()
