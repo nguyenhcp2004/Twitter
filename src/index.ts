@@ -11,6 +11,7 @@ import cors from 'cors'
 import tweetsRouters from './routes/tweets.routes'
 import bookmarksRouters from './routes/bookmarks.routes'
 import likesRouters from './routes/likes.routes'
+import searchRouter from './routes/search.routes'
 
 config()
 databaseService.connect().then(() => {
@@ -32,6 +33,7 @@ app.use('/medias', mediasRoutes)
 app.use('/tweets', tweetsRouters)
 app.use('/bookmarks', bookmarksRouters)
 app.use('/likes', likesRouters)
+app.use('/search', searchRouter)
 app.use('/static', staticRoutes)
 app.use('/static/video', express.static(UPLOAD_VIDEO_DIR))
 app.use(defaultErrorHandler)

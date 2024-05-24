@@ -69,7 +69,7 @@ tweetsRouters.get(
  * Path: /
  * Method: GET
  * Headers: { Authorization: Bearer <access_token> }
- * Querry: { limit: number, page: number, tweet_type: TweetType}
+ * Querry: { limit: number, page: number}
  */
 tweetsRouters.get(
   '/',
