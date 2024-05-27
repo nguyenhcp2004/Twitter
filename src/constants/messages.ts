@@ -1,3 +1,5 @@
+import { MediaTypeQuery, PeopleFollow } from './enums'
+
 export const USER_MESSAGES = {
   VALIDATION_ERROR: 'Validation error',
   NAME_IS_REQUIRED: 'Name is required',
@@ -88,4 +90,11 @@ export const BOOKMARK_MESSAGES = {
 export const LIKE_MESSAGES = {
   LIKE_SUCCESSFULLY: 'Like successfully',
   UNLIKE_SUCCESSFULLY: 'Unlike successfully'
+} as const
+
+export const SEARCH_MESSAGES = {
+  CONTENT_MUST_BE_STRING: 'Content must be string',
+  MEDIA_TYPE_MUST_BE_ONE_OF_MEDIA_TYPE_QUERY: `Media must be one of ${Object.values(MediaTypeQuery).join(', ')}`,
+  PEOPLE_FOLLOW_MUST_BE_ONE_OF_PEOPLE_FOLLOW: `People follow be one of ${Object.values(PeopleFollow).join(', ')}`,
+  SEARCH_SUCCESSFULLY: 'Search Successfully'
 } as const

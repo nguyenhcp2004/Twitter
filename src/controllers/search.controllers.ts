@@ -1,9 +1,10 @@
 import { ParamsDictionary } from 'express-serve-static-core'
 import { Request, Response } from 'express'
-import { SearchQuey } from '~/models/requests/Search.requests'
+import { SearchQuery } from '~/models/requests/Search.requests'
 import searchService from '~/services/search.services'
+import { SEARCH_MESSAGES } from '~/constants/messages'
 
-export const searchController = async (req: Request<ParamsDictionary, any, any, SearchQuey>, res: Response) => {
+export const searchController = async (req: Request<ParamsDictionary, any, any, SearchQuery>, res: Response) => {
   const limit = Number(req.query.limit)
   const page = Number(req.query.page)
   const result = await searchService.search({
@@ -15,7 +16,7 @@ export const searchController = async (req: Request<ParamsDictionary, any, any, 
     people_follow: req.query.people_follow
   })
   return res.json({
-    message: 'Search Successfully',
+    message: SEARCH_MESSAGES.SEARCH_SUCCESSFULLY,
     result: {
       tweets: result.tweets,
       limit,
