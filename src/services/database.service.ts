@@ -39,6 +39,13 @@ class DatabaseService {
     }
   }
 
+  async indexTweets() {
+    const exists = await this.tweets.indexExists(['content_text'])
+    if (!exists) {
+      this.tweets.createIndex({ content: 'text' }, { default_language: 'none' })
+    }
+  }
+
   async indexRefreshTokens() {
     const exists = await this.refreshTokens.indexExists(['token_1', 'exp_1'])
     if (!exists) {

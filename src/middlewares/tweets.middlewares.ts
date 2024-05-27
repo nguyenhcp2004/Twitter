@@ -6,6 +6,7 @@ import { MediaType, TweetAudience, TweetType, UserVerifyStatus } from '~/constan
 import HTTP_STATUS from '~/constants/httpStatus'
 import { TWEETS_MESSAGES, USER_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Errors'
+import { Media } from '~/models/Others'
 import { TokenPayload } from '~/models/requests/User.requests'
 import Tweet from '~/models/schemas/Tweet.schema'
 import databaseService from '~/services/database.service'
@@ -108,8 +109,8 @@ export const createTweetValidator = validate(
           //Yêu cầu mỗi phần tử trong array là Media Object
           options: (value, { req }) => {
             if (
-              value.some((item: any) => {
-                return typeof item.url !== 'string' || mediaTypes.includes(item.type)
+              value.some((item: Media) => {
+                return typeof item.url !== 'string' || !mediaTypes.includes(item.type)
               })
             ) {
               throw new Error(TWEETS_MESSAGES.MEDIAS_MUST_BE_AN_ARRAY_OF_MEDIA_OBJECT)
