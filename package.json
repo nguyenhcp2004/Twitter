@@ -39,6 +39,7 @@
     "typescript": "^5.4.3"
   },
   "dependencies": {
+    "@aws-sdk/client-ses": "^3.583.0",
     "@types/cors": "^2.8.17",
     "axios": "^1.6.8",
     "cors": "^2.8.5",

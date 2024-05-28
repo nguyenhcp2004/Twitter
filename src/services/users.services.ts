@@ -11,6 +11,8 @@ import { USER_MESSAGES } from '~/constants/messages'
 import axios from 'axios'
 import { ErrorWithStatus } from '~/models/Errors'
 import HTTP_STATUS from '~/constants/httpStatus'
+import { sendForgotPasswordEmail, sendVerifyRegisterEmail } from '~/utils/email'
+
 config()
 
 class UsersService {
@@ -116,6 +118,13 @@ class UsersService {
     await databaseService.refreshTokens.insertOne(
       new RefreshToken({ user_id: new ObjectId(user_id), token: refresh_token, iat, exp })
     )
+    //Flow verify email
+    //1. Server send email to user
+    //2. User click link in email
+    //3. Client send request to server with email_verify_token
+    //4. Server verify email_verify_token
+    //5. Client receive access_token and refresh_token
+    await sendVerifyRegisterEmail(payload.email, email_verify_token)
     return {
       access_token,
       refresh_token
@@ -276,10 +285,9 @@ class UsersService {
     }
   }
 
-  async resendVerifyEmail(user_id: string) {
+  async resendVerifyEmail(user_id: string, email: string) {
     const email_verify_token = await this.signEmailVerifyToken({ user_id, verify: UserVerifyStatus.Unverified })
-    //Giả bộ gửi email
-    console.log('Resend Verify Email: ', email_verify_token)
+    await sendVerifyRegisterEmail(email, email_verify_token)
 
     //Cập nhật lại giá trị email_verify_token trong document user
     await databaseService.users.updateOne(
@@ -299,7 +307,7 @@ class UsersService {
     }
   }
 
-  async forgotPassword({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
+  async forgotPassword({ user_id, verify, email }: { user_id: string; email: string; verify: UserVerifyStatus }) {
     const forgot_password_token = await this.signForgotPasswordToken({ user_id, verify })
     databaseService.users.updateOne({ _id: new ObjectId(user_id) }, [
       {
@@ -310,7 +318,7 @@ class UsersService {
       }
     ])
     //Gửi email kèm đường link đến email người dùng: https://twitter.com/forgot_password?token=token
-    console.log('forgot password token: ', forgot_password_token)
+    await sendForgotPasswordEmail(email, forgot_password_token)
     return {
       message: USER_MESSAGES.CHECK_EMAIL_TO_RESET_PASSWORD
     }
