@@ -13,7 +13,6 @@ export const uploadImage = async (req: Request, res: Response, next: NextFunctio
     message: USER_MESSAGES.UPLOAD_SUCCESS,
     result: url
   })
-  next()
 }
 
 export const uploadVideo = async (req: Request, res: Response) => {
