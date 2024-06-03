@@ -3,7 +3,6 @@ import path from 'path'
 import sharp from 'sharp'
 import { UPLOAD_IMAGE_DIR } from '~/constants/dir'
 import { getNameFromFullName, handleUploadImage, handleUploadVideo } from '~/utils/file'
-import fs from 'fs'
 import fsPromise from 'fs/promises'
 import { isProduction } from '~/constants/config'
 import { config } from 'dotenv'
@@ -12,6 +11,7 @@ import { Media } from '~/models/Others'
 import { encodeHLSWithMultipleVideoStreams } from '~/utils/video'
 import databaseService from './database.service'
 import VideoStatus from '~/models/schemas/VideoStatus.schema'
+import { rimraf, rimrafSync } from 'rimraf'
 config()
 
 class Queue {
@@ -107,7 +107,8 @@ class MediasService {
         const newName = getNameFromFullName(file.newFilename)
         const newPath = path.resolve(UPLOAD_IMAGE_DIR, `${newName}.jpg`)
         await sharp(file.filepath).jpeg().toFile(newPath)
-        fs.unlinkSync(file.filepath)
+        //Tam thoi chua fix duoc
+        // rimrafSync(file.filepath)
         return {
           url: isProduction
             ? `${process.env.HOST}/static/image/${newName}.jpg`

@@ -1,17 +1,19 @@
-import { Request, Response } from 'express'
-import { UPLOAD_IMAGE_DIR, UPLOAD_VIDEO_DIR } from '~/constants/dir'
+import { NextFunction, Request, Response } from 'express'
+import { UPLOAD_IMAGE_DIR, UPLOAD_IMAGE_TEMP_DIR, UPLOAD_VIDEO_DIR } from '~/constants/dir'
 import { USER_MESSAGES } from '~/constants/messages'
 import mediasService from '~/services/medias.services'
 import path from 'path'
 import HTTP_STATUS from '~/constants/httpStatus'
 import fs from 'fs'
+import { rimraf } from 'rimraf'
 
-export const uploadImage = async (req: Request, res: Response) => {
+export const uploadImage = async (req: Request, res: Response, next: NextFunction) => {
   const url = await mediasService.uploadImage(req)
   res.json({
     message: USER_MESSAGES.UPLOAD_SUCCESS,
     result: url
   })
+  next()
 }
 
 export const uploadVideo = async (req: Request, res: Response) => {
