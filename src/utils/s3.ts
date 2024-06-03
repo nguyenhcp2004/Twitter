@@ -1,10 +1,12 @@
-import { ListBucketsCommand, S3Client } from '@aws-sdk/client-s3'
+import { S3 } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
+import { Response } from 'express'
 import fs from 'fs'
 import path from 'path'
+import HTTP_STATUS from '~/constants/httpStatus'
 
 // a client can be shared by different commands.
-const s3 = new S3Client({
+const s3 = new S3({
   region: process.env.AWS_REGION,
   credentials: {
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY as string,
@@ -24,7 +26,7 @@ export const uploadFileToS3 = ({
   const parallelUploads3 = new Upload({
     client: s3,
     params: {
-      Bucket: 'twitter-clone-2024-3005-ap-southeast-1',
+      Bucket: process.env.S3_BUCKET_NAME,
       Key: filename,
       Body: fs.readFileSync(filepath),
       ContentType: contentType
@@ -50,6 +52,18 @@ export const uploadFileToS3 = ({
   })
 
   return parallelUploads3.done()
+}
+
+export const sendFileFromS3 = async (res: Response, filepath: string) => {
+  try {
+    const data = await s3.getObject({
+      Bucket: process.env.S3_BUCKET_NAME as string,
+      Key: filepath
+    })
+    ;(data.Body as any).pipe(res)
+  } catch (error) {
+    res.status(HTTP_STATUS.NOT_FOUND).send('Not found')
+  }
 }
 
 // parallelUploads3.on('httpUploadProgress', (progress) => {

@@ -6,6 +6,7 @@ import path from 'path'
 import HTTP_STATUS from '~/constants/httpStatus'
 import fs from 'fs'
 import { rimraf } from 'rimraf'
+import { sendFileFromS3 } from '~/utils/s3'
 
 export const uploadImage = async (req: Request, res: Response, next: NextFunction) => {
   const url = await mediasService.uploadImage(req)
@@ -96,18 +97,20 @@ export const serveVideoStream = async (req: Request, res: Response) => {
 
 export const serveM3u8 = async (req: Request, res: Response) => {
   const { id } = req.params
-  return res.sendFile(path.resolve(UPLOAD_VIDEO_DIR, id, 'master.m3u8'), (err) => {
-    if (err) {
-      res.status((err as any).status).send('Not found')
-    }
-  })
+  sendFileFromS3(res as any, `video-hls/${id}/master.m3u8`)
+  // return res.sendFile(path.resolve(UPLOAD_VIDEO_DIR, id, 'master.m3u8'), (err) => {
+  //   if (err) {
+  //     res.status((err as any).status).send('Not found')
+  //   }
+  // })
 }
 
 export const serveSegment = async (req: Request, res: Response) => {
   const { id, v, segment } = req.params
-  return res.sendFile(path.resolve(UPLOAD_VIDEO_DIR, id, v, segment), (err) => {
-    if (err) {
-      res.status((err as any).status).send('Not found')
-    }
-  })
+  sendFileFromS3(res as any, `video-hls/${id}/${v}/${segment}`)
+  // return res.sendFile(path.resolve(UPLOAD_VIDEO_DIR, id, v, segment), (err) => {
+  //   if (err) {
+  //     res.status((err as any).status).send('Not found')
+  //   }
+  // })
 }

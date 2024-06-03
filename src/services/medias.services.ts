@@ -1,8 +1,8 @@
 import { Request } from 'express'
 import path from 'path'
 import sharp from 'sharp'
-import { UPLOAD_IMAGE_DIR } from '~/constants/dir'
-import { getNameFromFullName, handleUploadImage, handleUploadVideo } from '~/utils/file'
+import { UPLOAD_IMAGE_DIR, UPLOAD_VIDEO_DIR } from '~/constants/dir'
+import { getFiles, getNameFromFullName, handleUploadImage, handleUploadVideo } from '~/utils/file'
 import fsPromise from 'fs/promises'
 import { isProduction } from '~/constants/config'
 import { config } from 'dotenv'
@@ -54,9 +54,22 @@ class Queue {
           }
         }
       )
+      const mime = (await import('mime')).default
       try {
         await encodeHLSWithMultipleVideoStreams(videoPath)
         this.items.shift()
+        const files = getFiles(path.resolve(UPLOAD_VIDEO_DIR, idName))
+        await Promise.all(
+          files.map((filepath) => {
+            const filename = 'video-hls' + filepath.replace(path.resolve(UPLOAD_VIDEO_DIR) + '\\', '/')
+            return uploadFileToS3({
+              filepath,
+              filename,
+              contentType: mime.getType(filepath) as string
+            })
+          })
+        )
+        rimrafSync(path.resolve(UPLOAD_VIDEO_DIR, idName))
         await databaseService.videoStatus.updateOne(
           {
             name: idName
@@ -70,7 +83,6 @@ class Queue {
             }
           }
         )
-        await fsPromise.unlink(videoPath)
         console.log(`Encode ${videoPath} success`)
       } catch (error) {
         await databaseService.videoStatus
