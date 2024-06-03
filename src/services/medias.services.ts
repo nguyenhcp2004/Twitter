@@ -104,16 +104,16 @@ class Queue {
 const queue = new Queue()
 class MediasService {
   async uploadImage(req: Request) {
+    const mime = (await import('mime')).default
     const files = await handleUploadImage(req)
     const result: Media[] = await Promise.all(
       files.map(async (file) => {
         const newName = getNameFromFullName(file.newFilename)
         const newFullFileName = `${newName}.jpg`
-        const mime = (await import('mime')).default
         const newPath = path.resolve(UPLOAD_IMAGE_DIR, newFullFileName)
         await sharp(file.filepath).jpeg().toFile(newPath)
         const s3Result = await uploadFileToS3({
-          filename: newFullFileName,
+          filename: 'images/' + newFullFileName,
           filepath: newPath,
           contentType: mime.getType(newFullFileName) as string
         })
@@ -135,16 +135,28 @@ class MediasService {
   }
 
   async uploadVideo(req: Request) {
+    const mime = (await import('mime')).default
     const files = await handleUploadVideo(req)
-    const result: Media[] = files.map((file) => {
-      return {
-        url: isProduction
-          ? `${process.env.HOST}/static/video-stream/${file.newFilename}`
-          : `http://localhost:${process.env.PORT}/static/video-stream/${file.newFilename}`,
-        type: MediaType.Video
-      }
-    })
-
+    const result: Media[] = await Promise.all(
+      files.map(async (file) => {
+        const s3Result = await uploadFileToS3({
+          filename: 'videos/' + file.newFilename,
+          contentType: mime.getType(file.filepath) as string,
+          filepath: file.filepath
+        })
+        fsPromise.unlink(file.filepath)
+        return {
+          url: (s3Result as CompleteMultipartUploadCommandOutput).Location as string,
+          type: MediaType.Video
+        }
+        // return {
+        //   url: isProduction
+        //     ? `${process.env.HOST}/static/video-stream/${file.newFilename}`
+        //     : `http://localhost:${process.env.PORT}/static/video-stream/${file.newFilename}`,
+        //   type: MediaType.Video
+        // }
+      })
+    )
     return result
   }
 
