@@ -12,6 +12,8 @@ import tweetsRouters from './routes/tweets.routes'
 import bookmarksRouters from './routes/bookmarks.routes'
 import likesRouters from './routes/likes.routes'
 import searchRouter from './routes/search.routes'
+import { createServer } from 'http'
+import { Server } from 'socket.io'
 
 config()
 databaseService.connect().then(() => {
@@ -22,6 +24,8 @@ databaseService.connect().then(() => {
   databaseService.indexTweets()
 })
 const app = express()
+const httpServer = createServer(app)
+
 app.use(cors())
 const port = process.env.PORT || 4000
 
@@ -37,7 +41,22 @@ app.use('/likes', likesRouters)
 app.use('/search', searchRouter)
 app.use('/static', staticRoutes)
 app.use('/static/video', express.static(UPLOAD_VIDEO_DIR))
+
 app.use(defaultErrorHandler)
-app.listen(port, () => {
+
+const io = new Server(httpServer, {
+  cors: {
+    origin: 'http://localhost:3000'
+  }
+})
+
+io.on('connection', (socket) => {
+  console.log(`user ${socket.id} connected`)
+  socket.on('disconnect', () => {
+    console.log(`user ${socket.id} disconnected`)
+  })
+})
+
+httpServer.listen(port, () => {
   console.log(`App listening on port ${port}`)
 })
