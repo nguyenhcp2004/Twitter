@@ -14,6 +14,8 @@ import likesRouters from './routes/likes.routes'
 import searchRouter from './routes/search.routes'
 import { createServer } from 'http'
 import { Server } from 'socket.io'
+import Conversation from './models/schemas/Conversations.schema'
+import { ObjectId } from 'mongodb'
 
 config()
 databaseService.connect().then(() => {
@@ -56,15 +58,22 @@ const users: {
   }
 } = {}
 io.on('connection', (socket) => {
-  console.log(`user ${socket.id} connected`)
+  // console.log(`user ${socket.id} connected`)
   const user_id = socket.handshake.auth._id
   users[user_id] = {
     socket_id: socket.id
   }
 
-  socket.on('private_message', (data) => {
+  socket.on('private_message', async (data) => {
     const receiver_socket_id = users[data.to]?.socket_id
     if (!receiver_socket_id) return
+    await databaseService.conversations.insertOne(
+      new Conversation({
+        sender_id: new ObjectId(data.from),
+        receiver_id: new ObjectId(data.to),
+        content: data.content
+      })
+    )
     socket.to(receiver_socket_id).emit('receive_private_message', {
       content: data.content,
       from: user_id
@@ -73,7 +82,7 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     delete users[user_id]
-    console.log(`user ${socket.id} disconnected`)
+    // console.log(`user ${socket.id} disconnected`)
   })
 })
 
