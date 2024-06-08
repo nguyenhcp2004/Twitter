@@ -63,7 +63,8 @@ io.on('connection', (socket) => {
   }
 
   socket.on('private_message', (data) => {
-    const receiver_socket_id = users[data.to].socket_id
+    const receiver_socket_id = users[data.to]?.socket_id
+    if (!receiver_socket_id) return
     socket.to(receiver_socket_id).emit('receive_private_message', {
       content: data.content,
       from: user_id
