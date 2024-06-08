@@ -16,6 +16,7 @@ import { createServer } from 'http'
 import { Server } from 'socket.io'
 import Conversation from './models/schemas/Conversations.schema'
 import { ObjectId } from 'mongodb'
+import conversationsRouter from './routes/conversations.routes'
 
 config()
 databaseService.connect().then(() => {
@@ -41,6 +42,7 @@ app.use('/tweets', tweetsRouters)
 app.use('/bookmarks', bookmarksRouters)
 app.use('/likes', likesRouters)
 app.use('/search', searchRouter)
+app.use('/conversations', conversationsRouter)
 app.use('/static', staticRoutes)
 app.use('/static/video', express.static(UPLOAD_VIDEO_DIR))
 
