@@ -21,7 +21,6 @@ class ConversationService {
     }
     const conversations = await databaseService.conversations
       .find(match)
-      .sort('created_at', 'desc')
       .skip(limit * (page - 1))
       .limit(limit)
       .toArray()
