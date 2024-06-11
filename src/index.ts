@@ -75,6 +75,7 @@ io.on('connection', (socket) => {
       receiver_id: new ObjectId(receiver_id),
       content: content
     })
+    console.log(content)
     const result = await databaseService.conversations.insertOne(conversation)
     conversation._id = result.insertedId
     socket.to(receiver_socket_id).emit('SERVER_SEND_MESSAGE', {
