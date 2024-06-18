@@ -1,0 +1,185 @@
+openapi: 3.0.3
+info:
+  title: Twitter clone TypeScript
+  description: |-
+    This is a sample Pet Store Server based on the OpenAPI 3.0 specification.  You can find out more about
+    Swagger at [https://swagger.io](https://swagger.io). In the third iteration of the pet store, we've switched to the design first approach!
+    You can now help us improve the API whether it's by making changes to the definition itself or to the code.
+    That way, with time, we can improve the API in general, and expose some of the new features in OAS3.
+
+    _If you're looking for the Swagger 2.0/OAS 2.0 version of Petstore, then click [here](https://editor.swagger.io/?url=https://petstore.swagger.io/v2/swagger.yaml). Alternatively, you can load via the `Edit > Load Petstore OAS 2.0` menu option!_
+
+    Some useful links:
+    - [The Pet Store repository](https://github.com/swagger-api/swagger-petstore)
+    - [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: phuongnguyen2772004.work@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+  - url: http://localhost:4000
+tags:
+  - name: users
+    description: Các API liên quan đến user
+  - name: tweets
+    description: Operations about tweet
+  - name: bookmarks
+    description: Operations about bookmark
+  - name: conversations
+    description: Operations about conversation
+  - name: likes
+    description: Operations about like
+  - name: static
+    description: Operations about static
+  - name: searchs
+    description: Operations about search
+  - name: medias
+    description: Operations about media
+paths:
+  /users/login:
+    post:
+      tags:
+        - users
+      summary: Đăng nhập
+      description: Đăng nhập vào hệ thống
+      operationId: login
+      requestBody:
+        description: Thông tin đăng nhập
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginBody'
+        required: true
+      responses:
+        '200':
+          description: Đăng nhập thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Login successful
+                  result:
+                    $ref: '#/components/schemas/SuccessAthentication'
+
+        '422':
+          description: Invalid Input
+  /users/me:
+    get:
+      tags:
+        - users
+      summary: Lấy thông tin user
+      description: Lấy thông tin user
+      operationId: getMe
+
+      responses:
+        default:
+          description: Lấy thông tin user thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+      security:
+        - BearerAuth: []
+components:
+  schemas:
+    LoginBody:
+      type: object
+      properties:
+        email:
+          type: string
+          example: yugivip277@gmail.com
+        password:
+          type: string
+          example: Nguyen.123
+    SuccessAthentication:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjY1NWZmYzg3NjczNGE1YWViOGM5OThlIiwidG9rZW5fdHlwZSI6MCwidmVyaWZ5IjoxLCJpYXQiOjE3MTg1MDk3MjksImV4cCI6MTcxODU5NjEyOX0.706jmoJA1ABCkY3J9XHVvU9H2R-BC-24ouGCO27G7ts
+        refresh_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjY1NWZmYzg3NjczNGE1YWViOGM5OThlIiwidG9rZW5fdHlwZSI6MSwidmVyaWZ5IjoxLCJpYXQiOjE3MTg1MDk3MjksImV4cCI6MTcyNzE0OTcyOX0.OEkzHMUMWm-Fh7FSv2oo5kMQShhsHK2XaKJwQlij5os
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: MongoId
+          description: The unique identifier for the user
+          example: 6655ffc876734a5aeb8c998e
+        name:
+          type: string
+          description: The name of the user
+          example: nguyen277
+        email:
+          type: string
+          description: The email address of the user
+          example: yugivip277+1@gmail.com
+        date_of_birth:
+          type: string
+          format: ISO8601
+          description: The date of birth of the user
+          example: 2024-04-04T02:57:07.194Z
+        created_at:
+          type: string
+          format: ISO8601
+          description: The timestamp when the user was created
+          example: 2024-05-28T16:01:12.988Z
+        updated_at:
+          type: string
+          format: ISO8601
+          description: The timestamp when the user was last updated
+          example: 2024-05-28T16:36:03.544Z
+        verify:
+          $ref: '#/components/schemas/UserVerifyStatus'
+        twitter_circle:
+          type: array
+          items:
+            type: string
+            format: MongoId
+          description: A list of Twitter circles the user belongs to
+          example: ['6655ffc876734a5aeb8c998e']
+        bio:
+          type: string
+          description: The bio of the user
+          example: 'This is my bio.'
+        location:
+          type: string
+          description: The location of the user
+          example: 'Thu Duc, Ho Chi Minh'
+        website:
+          type: string
+          description: The website of the user
+          example: 'www.example.com'
+        username:
+          type: string
+          description: The username of the user
+          example: user6655ffc876734a5aeb8c998e
+        avatar:
+          type: string
+          description: The URL of the user's avatar
+          example: 'http:localhost:4000/images/avatars/john_doe.jpg'
+        cover_photo:
+          type: string
+          description: The URL of the user's cover photo
+          example: 'http:localhost:4000/images/avatars/john_doe.jpg'
+    UserVerifyStatus:
+      type: number
+      enum: [Unverified, Verified, Banned]
+      example: 1
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

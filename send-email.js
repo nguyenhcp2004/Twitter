@@ -62,4 +62,4 @@ const sendVerifyEmail = async (toAddress, subject, body) => {
   }
 }
 
-sendVerifyEmail('yugivip277@gmail.com', 'Tiêu đề email', '<h1>Nội dung email</h1>')
+// sendVerifyEmail('yugivip277@gmail.com', 'Tiêu đề email', '<h1>Nội dung email</h1>')

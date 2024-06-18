@@ -1,11 +1,10 @@
-import { config } from 'dotenv'
 import jwt, { SignOptions } from 'jsonwebtoken'
+import { envConfig } from '~/constants/config'
 import { TokenPayload } from '~/models/requests/User.requests'
-config()
 
 export const signToken = ({
   payload,
-  privateKey = process.env.JWT_SECRET as string,
+  privateKey = envConfig.jwtSecret as string,
   options = {
     algorithm: 'HS256'
   }
@@ -26,7 +25,7 @@ export const signToken = ({
 
 export const verifyToken = ({
   token,
-  secretOrPublicKey = process.env.JWT_SECRET as string
+  secretOrPublicKey = envConfig.jwtSecret as string
 }: {
   token: string
   secretOrPublicKey?: string
