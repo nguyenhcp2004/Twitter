@@ -6,7 +6,7 @@ import { mediasRoutes } from './routes/medias.routes'
 import { initFolder } from './utils/file'
 import { UPLOAD_VIDEO_DIR } from './constants/dir'
 import { staticRoutes } from './routes/static.routes'
-import cors from 'cors'
+import cors, { CorsOptions } from 'cors'
 import tweetsRouters from './routes/tweets.routes'
 import bookmarksRouters from './routes/bookmarks.routes'
 import likesRouters from './routes/likes.routes'
@@ -18,7 +18,8 @@ import { initSocket } from './utils/socket'
 import YAML from 'yaml'
 import path from 'path'
 import swaggerUi from 'swagger-ui-express'
-import { envConfig } from '~/constants/config'
+import { envConfig, isProduction } from '~/constants/config'
+import helmet from 'helmet'
 
 const file = fs.readFileSync(path.resolve('openapi/twitter-swagger.yaml'), 'utf8')
 const swaggerDocument = YAML.parse(file)
@@ -33,7 +34,11 @@ databaseService.connect().then(() => {
 const app = express()
 const httpServer = createServer(app)
 
-app.use(cors())
+app.use(helmet())
+const corsOptions: CorsOptions = {
+  origin: isProduction ? envConfig.clientUrl : '*'
+}
+app.use(cors(corsOptions))
 const port = envConfig.port || 4000
 
 //Tạo folder upload
