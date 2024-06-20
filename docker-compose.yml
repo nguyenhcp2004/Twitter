@@ -1,0 +1,8 @@
+version: '3'
+services:
+  twitter:
+    image: huynhnguyen/twitter:v1
+    ports:
+      - '4000:4000'
+    volumes:
+      - 'D:/Workspace/MERN/Twitter/uploads:/app/uploads'
