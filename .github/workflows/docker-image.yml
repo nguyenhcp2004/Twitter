@@ -2,27 +2,25 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ['main']
   pull_request:
-    branches: [ "main" ]
+    branches: ['main']
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Create env file
-      run: echo "${{ secrets.TWITTER_ENV_PRODUCTION }}" > .env.production
-    - name: Build the Docker image
-      run: | 
-        IMAGE_TAG=huynhnguyen/twitter:$(date + %s)
-        docker build . --file Dockerfile --tag $IMAGE_TAG 
-        echo "::set-output name=image_tag::$IMAGE_TAG"
-      id: build
-    - name: Log in to Docker Hub
-      run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ DOCKERHUB_PASSWORD }}
-    - name: Push Docker image to Docker Hub
-      run: docker push ${{ steps.build.outputs.image_tag }}
+      - uses: actions/checkout@v4
+      - name: Create env file
+        run: echo "${{ secrets.TWITTER_ENV_PRODUCTION }}" > .env.production
+      - name: Build the Docker image
+        run: |
+          IMAGE_TAG=huynhnguyen/twitter:$(date + %s)
+          docker build . --file Dockerfile --tag $IMAGE_TAG 
+          echo "::set-output name=image_tag::$IMAGE_TAG"
+        id: build
+      - name: Log in to Docker Hub
+        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
+      - name: Push Docker image to Docker Hub
+        run: docker push ${{ steps.build.outputs.image_tag }}
