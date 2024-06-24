@@ -441,7 +441,16 @@ class UsersService {
   }
 
   async getProfile(username: string) {
-    const user = await databaseService.users.findOne({ username })
+    const user = await databaseService.users.findOne(
+      { username },
+      {
+        projection: {
+          password: 0,
+          email_verify_token: 0,
+          forgot_password_token: 0
+        }
+      }
+    )
     return user
   }
 }

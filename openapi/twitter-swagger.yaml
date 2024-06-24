@@ -28,19 +28,19 @@ tags:
   - name: users
     description: Các API liên quan đến user
   - name: tweets
-    description: Operations about tweet
+    description: Các API liên quan đến tweet
   - name: bookmarks
-    description: Operations about bookmark
+    description: Các API liên quan đến bookmark
   - name: conversations
-    description: Operations about conversation
+    description: Các API liên quan đến conversation
   - name: likes
-    description: Operations about like
+    description: Các API liên quan đến like
   - name: static
-    description: Operations about static
+    description: Các API liên quan đến static
   - name: searchs
-    description: Operations about search
+    description: Các API liên quan đến search
   - name: medias
-    description: Operations about media
+    description: Các API liên quan đến media
 paths:
   /users/login:
     post:
@@ -90,6 +90,269 @@ paths:
 
       security:
         - BearerAuth: []
+  /users/oauth/google:
+    get:
+      tags:
+        - users
+      summary: Đăng nhập Google
+      description: Đăng nhập Google
+      operationId: googleLogin
+      parameters:
+        - name: code
+          in: query
+          description: The code value that need to verify gmail
+          required: true
+          schema:
+            type: string
+      responses:
+        '400':
+          description: Gmail chưa được xác thực
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Gmail chưa được xác thực
+        '200':
+          description: Đăng nhập Google
+  /users/register:
+    post:
+      tags:
+        - users
+      summary: Đăng kí tài khoản mới
+      description: Đăng kí tài khoản mới
+      operationId: register
+      requestBody:
+        description: Chi tiết đăng ký người dùng
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterBody'
+        required: true
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Register success
+                  result:
+                    $ref: '#/components/schemas/SuccessAthentication'
+        '422':
+          description: Unprocessable Content
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invalid input data
+  /users/logout:
+    post:
+      summary: Đăng xuất khỏi hệ thống
+      description: Đăng xuất khỏi hệ thống
+      operationId: logout
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+                  description: refresh_token cần được vô hiệu hóa
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjY1NWZmYzg3NjczNGE1YWViOGM5OThlIiwidG9rZW5fdHlwZSI6MSwidmVyaWZ5IjoxLCJpYXQiOjE3MTg1MDk3MjksImV4cCI6MTcyNzE0OTcyOX0.OEkzHMUMWm-Fh7FSv2oo5kMQShhsHK2XaKJwQlij5os
+      responses:
+        default:
+          description: Đăng xuất thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Logout success'
+      security:
+        - BearerAuth: []
+  /users/refresh-token:
+    post:
+      summary: Làm mới access_token
+      description: Làm mới access_token
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+                  description: refresh_token để tạo mới access_token
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjY1NWZmYzg3NjczNGE1YWViOGM5OThlIiwidG9rZW5fdHlwZSI6MSwidmVyaWZ5IjoxLCJpYXQiOjE3MTg1MDk3MjksImV4cCI6MTcyNzE0OTcyOX0.OEkzHMUMWm-Fh7FSv2oo5kMQShhsHK2XaKJwQlij5os
+      responses:
+        default:
+          description: Successfully refreshed token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessAthentication'
+      security:
+        - BearerAuth: []
+  /users/verify-email:
+    post:
+      summary: Xác thực email
+      description: Xác thực email
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email_verify_token:
+                  type: string
+                  description: The token used to verify the email
+                  example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjY3N2NiZmUwNmEzYzQxYzE4Y2Y2ZDRhIiwidG9rZW5fdHlwZSI6MywidmVyaWZ5IjowLCJpYXQiOjE3MTkxMjcwMzgsImV4cCI6MTcxOTczMTgzOH0.Z33ycHXVjvOeKUE09jrtDLYIjIrCqd9nxIptZd04jgI'
+      responses:
+        default:
+          description: Email xác thực thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Email verify success'
+                  result:
+                    $ref: '#/components/schemas/SuccessAthentication'
+  /users/{username}:
+    get:
+      summary: Lâý thông tin người dùng
+      description: Lâý thông tin người dùng
+      tags:
+        - users
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The username of the user whose profile is being retrieved
+          example: 'user66560400389d949535854b02'
+      responses:
+        default:
+          description: Lấy thông tin người dùng thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+      security:
+        - BearerAuth: []
+  /tweets:
+    post:
+      summary: Tạo một tweet
+      description: Tạo một tweet
+      tags:
+        - tweets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TweetRequestBody'
+      responses:
+        '201':
+          description: Tweet created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweet'
+      security:
+        - BearerAuth: []
+  /tweets/{tweet_id}:
+    get:
+      summary: Lấy 1 tweet
+      description: Lấy 1 tweet
+      tags:
+        - tweets
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the tweet to retrieve
+          example: '60d0fe4f5311236168a109ca'
+      responses:
+        default:
+          description: Lấy 1 tweet
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Get tweet success'
+                  result:
+                    $ref: '#/components/schemas/TweetDetail'
+      security:
+        - BearerAuth: []
+  /tweets/:
+    get:
+      summary: Lấy new feed
+      description: Lấy new feed
+      tags:
+        - tweets
+      parameters:
+        - name: limit
+          in: query
+          description: Giới hạn số tweet trả về
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Trang hiển thị
+          schema:
+            type: string
+      responses:
+        default:
+          description: Lấy new feed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Get tweets success'
+                  result:
+                    type: object
+                    properties:
+                      tweets:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/TweetChild'
+      security:
+        - BearerAuth: []
+
 components:
   schemas:
     LoginBody:
@@ -178,6 +441,365 @@ components:
       type: number
       enum: [Unverified, Verified, Banned]
       example: 1
+    RegisterBody:
+      type: object
+      properties:
+        name:
+          type: string
+          example: JohnDoe
+        email:
+          type: string
+          format: email
+          example: yugivip277+6@gmail.com
+        password:
+          type: string
+          format: password
+          example: Nguyen.123
+        confirm_password:
+          type: string
+          format: password
+          example: Nguyen.123
+        date_of_birth:
+          type: string
+          format: ISO8601
+          example: 2024-04-04T02:57:07.194Z
+      required:
+        - name
+        - email
+        - password
+        - confirm_password
+        - date_of_birth
+    TweetRequestBody:
+      type: object
+      required:
+        - type
+        - audience
+        - content
+        - parent_id
+        - hashtags
+        - mentions
+        - medias
+      properties:
+        type:
+          $ref: '#/components/schemas/TweetType'
+        audience:
+          $ref: '#/components/schemas/TweetAudience'
+        content:
+          type: string
+          description: The content of the tweet
+          example: 'Tweet 12345'
+        parent_id:
+          type: string
+          nullable: true
+          description: The ID of the parent tweet, null if it's a root tweet
+          example: null
+        hashtags:
+          type: array
+          items:
+            type: string
+          description: List of hashtags associated with the tweet
+          example: ['nextjs', 'reactjs', 'nodejs']
+        mentions:
+          type: array
+          items:
+            type: string
+          description: List of user mentions in the tweet
+          example: []
+        medias:
+          type: array
+          items:
+            type: object
+            required:
+              - url
+              - type
+            properties:
+              url:
+                type: string
+                format: uri
+                description: URL of the media
+                example: 'https://i.pinimg.com/736x/31/e3/11/31e311a854eb85b5de6008d2ddbc666d.jpg'
+              type:
+                type: integer
+                description: Type of the media (e.g., 1 for image, 2 for video, etc.)
+                example: 1
+    TweetType:
+      type: number
+      enum: [Tweet, Retweet, Comment, QuoteTweet]
+      example: 0
+    TweetAudience:
+      type: number
+      enum: [Everyone, TwitterCircle]
+      example: 0
+    Media:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          description: URL of the media
+          example: 'https://i.pinimg.com/736x/31/e3/11/31e311a854eb85b5de6008d2ddbc666d.jpg'
+        type:
+          $ref: '#/components/schemas/MediaType'
+    MediaType:
+      type: number
+      enum: [Image, Video, HlS]
+      example: 0
+    Tweet:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: MongoId
+          description: The unique identifier of the tweet
+          example: '60d0fe4f5311236168a109ca'
+        user_id:
+          type: string
+          format: MongoId
+          description: The unique identifier of the user who created the tweet
+          example: '60d0fe4f5311236168a109cb'
+        type:
+          $ref: '#/components/schemas/TweetType'
+        audience:
+          $ref: '#/components/schemas/TweetAudience'
+        content:
+          type: string
+          description: The content of the tweet
+          example: 'Tweet 12345'
+        parent_id:
+          type: string
+          nullable: true
+          format: MongoId
+          description: The ID of the parent tweet, null if it's a root tweet
+          example: null
+        hashtags:
+          type: array
+          items:
+            type: string
+            format: MongoId
+          description: List of hashtags associated with the tweet
+          example: ['664362f736ca83bf8fecfe44', '664362f736ca83bf8fecfe45', '6643630b36ca83bf8fecfe49']
+        mentions:
+          type: array
+          items:
+            type: string
+            format: MongoId
+          description: List of user mentions in the tweet
+          example: []
+        medias:
+          type: array
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+                format: uri
+                description: URL of the media
+                example: 'https://i.pinimg.com/736x/31/e3/11/31e311a854eb85b5de6008d2ddbc666d.jpg'
+              type:
+                $ref: '#/components/schemas/MediaType'
+        guest_views:
+          type: integer
+          description: The number of views by guests
+          example: 100
+        user_views:
+          type: integer
+          description: The number of views by registered users
+          example: 200
+        created_at:
+          type: string
+          format: ISO8601
+          description: The timestamp when the tweet was created
+          example: '2024-06-23T10:20:30Z'
+        updated_at:
+          type: string
+          format: ISO8601
+          description: The timestamp when the tweet was last updated
+          example: '2024-06-23T10:30:30Z'
+    TweetDetail:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: MongoId
+          description: The unique identifier of the tweet
+          example: '60d0fe4f5311236168a109ca'
+        user_id:
+          type: string
+          format: MongoId
+          description: The unique identifier of the user who created the tweet
+          example: '60d0fe4f5311236168a109cb'
+        type:
+          $ref: '#/components/schemas/TweetType'
+        audience:
+          $ref: '#/components/schemas/TweetAudience'
+        content:
+          type: string
+          description: The content of the tweet
+          example: 'Tweet 12345'
+        parent_id:
+          type: string
+          nullable: true
+          format: MongoId
+          description: The ID of the parent tweet, null if it's a root tweet
+          example: null
+        hashtags:
+          type: array
+          items:
+            type: string
+            format: MongoId
+          description: List of hashtags associated with the tweet
+          example: ['664362f736ca83bf8fecfe44', '664362f736ca83bf8fecfe45', '6643630b36ca83bf8fecfe49']
+        mentions:
+          type: array
+          items:
+            type: string
+            format: MongoId
+          description: List of user mentions in the tweet
+          example: []
+        medias:
+          type: array
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+                format: uri
+                description: URL of the media
+                example: 'https://i.pinimg.com/736x/31/e3/11/31e311a854eb85b5de6008d2ddbc666d.jpg'
+              type:
+                $ref: '#/components/schemas/MediaType'
+        guest_views:
+          type: integer
+          description: The number of views by guests
+          example: 100
+        user_views:
+          type: integer
+          description: The number of views by registered users
+          example: 200
+        created_at:
+          type: string
+          format: ISO8601
+          description: The timestamp when the tweet was created
+          example: '2024-06-23T10:20:30Z'
+        updated_at:
+          type: string
+          format: ISO8601
+          description: The timestamp when the tweet was last updated
+          example: '2024-06-23T10:30:30Z'
+        bookmarks:
+          type: integer
+          description: The number of bookmarks of the tweet
+          example: 0
+        likes:
+          type: integer
+          description: The number of likes of the tweet
+          example: 0
+        retweet_count:
+          type: integer
+          description: The number of retweets of the tweet
+          example: 0
+        comment_count:
+          type: integer
+          description: The number of comments on the tweet
+          example: 0
+        quote_count:
+          type: integer
+          description: The number of quotes of the tweet
+          example: 0
+    TweetChild:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: MongoId
+          description: The unique identifier of the tweet
+          example: '60d0fe4f5311236168a109ca'
+        user_id:
+          type: string
+          format: MongoId
+          description: The unique identifier of the user who created the tweet
+          example: '60d0fe4f5311236168a109cb'
+        type:
+          $ref: '#/components/schemas/TweetType'
+        audience:
+          $ref: '#/components/schemas/TweetAudience'
+        content:
+          type: string
+          description: The content of the tweet
+          example: 'Tweet 12345'
+        parent_id:
+          type: string
+          nullable: true
+          format: MongoId
+          description: The ID of the parent tweet, null if it's a root tweet
+          example: null
+        hashtags:
+          type: array
+          items:
+            type: string
+            format: MongoId
+          description: List of hashtags associated with the tweet
+          example: ['664362f736ca83bf8fecfe44', '664362f736ca83bf8fecfe45', '6643630b36ca83bf8fecfe49']
+        mentions:
+          type: array
+          items:
+            type: string
+            format: MongoId
+          description: List of user mentions in the tweet
+          example: []
+        medias:
+          type: array
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+                format: uri
+                description: URL of the media
+                example: 'https://i.pinimg.com/736x/31/e3/11/31e311a854eb85b5de6008d2ddbc666d.jpg'
+              type:
+                $ref: '#/components/schemas/MediaType'
+        guest_views:
+          type: integer
+          description: The number of views by guests
+          example: 100
+        user_views:
+          type: integer
+          description: The number of views by registered users
+          example: 200
+        created_at:
+          type: string
+          format: ISO8601
+          description: The timestamp when the tweet was created
+          example: '2024-06-23T10:20:30Z'
+        updated_at:
+          type: string
+          format: ISO8601
+          description: The timestamp when the tweet was last updated
+          example: '2024-06-23T10:30:30Z'
+        user:
+          $ref: '#/components/schemas/User'
+        bookmarks:
+          type: integer
+          description: The number of bookmarks of the tweet
+          example: 0
+        likes:
+          type: integer
+          description: The number of likes of the tweet
+          example: 0
+        retweet_count:
+          type: integer
+          description: The number of retweets of the tweet
+          example: 0
+        comment_count:
+          type: integer
+          description: The number of comments on the tweet
+          example: 0
+        quote_count:
+          type: integer
+          description: The number of quotes of the tweet
+          example: 0
+
   securitySchemes:
     BearerAuth:
       type: http

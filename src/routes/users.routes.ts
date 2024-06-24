@@ -34,7 +34,7 @@ router.post('/register', validator.registerValidator, wrapRequestHandler(control
  * Path: /logout
  * Method: POST
  * Header: { Authorization: Bearer <access_token> }
- * Body: { name: string, email: string, password: string, confirm_password: string, date_of_birth: ISO8601}
+ * Body: { refresh_token: string }
  */
 router.post(
   '/logout',
@@ -52,7 +52,7 @@ router.post(
 router.post('/refresh-token', validator.refreshTokenValidator, wrapRequestHandler(controller.refreshToken))
 
 /**
- * Description: Verify email when user cclient click on the link in email
+ * Description: Verify email when user client click on the link in email
  * Path: /verify-email
  * Method: POST
  * Body: { email_verify_token: string }
