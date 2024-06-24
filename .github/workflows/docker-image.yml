@@ -9,22 +9,18 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    outputs:
-      image_tag: ${{ steps.build.outputs.IMAGE_TAG }}
+
     steps:
       - uses: actions/checkout@v4
       - name: Create env file
         run: echo "${{ secrets.TWITTER_ENV_PRODUCTION }}" > .env.production
       - name: Build the Docker image
-        run: |
-          IMAGE_TAG=nguyenhcp2004/twitter:$(date +%s)
-          docker build . --file Dockerfile --tag $IMAGE_TAG 
-          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_OUTPUT
+        run: docker build . --file Dockerfile --tag nguyenhcp2004/twitter:v4
         id: build
       - name: Log in to Docker Hub
         run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
       - name: Push Docker image to Docker Hub
-        run: docker push  ${{ steps.build.outputs.IMAGE_TAG }}
+        run: docker push  nguyenhcp2004/twitter:v4
 
   deploy:
     runs-on: ubuntu-latest
@@ -39,6 +35,6 @@ jobs:
           port: ${{ secrets.PORT }}
           script: |
             docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
-            docker pull ${{ needs.build.outputs.image_tag }}
+            docker pull nguyenhcp2004/twitter:v4
             docker rm twitter-clone
-            docker run -dp 3000:3000 --name twitter-clone -v ~/twitter-clone/uploads:/app/uploads  ${{ needs.build.outputs.image_tag }}
+            docker run -dp 3000:3000 --name twitter-clone -v ~/twitter-clone/uploads:/app/uploads nguyenhcp2004/twitter:v4
