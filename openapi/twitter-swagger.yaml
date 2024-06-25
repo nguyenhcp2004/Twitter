@@ -1,27 +1,7 @@
 openapi: 3.0.3
 info:
   title: Twitter clone TypeScript
-  description: |-
-    This is a sample Pet Store Server based on the OpenAPI 3.0 specification.  You can find out more about
-    Swagger at [https://swagger.io](https://swagger.io). In the third iteration of the pet store, we've switched to the design first approach!
-    You can now help us improve the API whether it's by making changes to the definition itself or to the code.
-    That way, with time, we can improve the API in general, and expose some of the new features in OAS3.
-
-    _If you're looking for the Swagger 2.0/OAS 2.0 version of Petstore, then click [here](https://editor.swagger.io/?url=https://petstore.swagger.io/v2/swagger.yaml). Alternatively, you can load via the `Edit > Load Petstore OAS 2.0` menu option!_
-
-    Some useful links:
-    - [The Pet Store repository](https://github.com/swagger-api/swagger-petstore)
-    - [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)
-  termsOfService: http://swagger.io/terms/
-  contact:
-    email: phuongnguyen2772004.work@gmail.com
-  license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: 1.0.11
-externalDocs:
-  description: Find out more about Swagger
-  url: http://swagger.io
 servers:
   - url: http://localhost:4000
 tags:
@@ -36,8 +16,8 @@ tags:
   - name: likes
     description: Các API liên quan đến like
   - name: static
-    description: Các API liên quan đến static
-  - name: searchs
+    description: Các API để serve ảnh, video
+  - name: search
     description: Các API liên quan đến search
   - name: medias
     description: Các API liên quan đến media
@@ -312,8 +292,6 @@ paths:
                     example: 'Get tweet success'
                   result:
                     $ref: '#/components/schemas/TweetDetail'
-      security:
-        - BearerAuth: []
   /tweets/:
     get:
       summary: Lấy new feed
@@ -352,15 +330,539 @@ paths:
                           $ref: '#/components/schemas/TweetChild'
       security:
         - BearerAuth: []
+  /tweets/{tweet_id}/children:
+    get:
+      summary: Lấy tweet con 1 tweet (retweet, quote hoặc comment)
+      description: Lấy tweet con 1 tweet (retweet, quote hoặc comment)
+      tags:
+        - tweets
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Id của tweet cha
+          example: '664e12bd4506fa7ec0c856f1'
+        - name: limit
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Giới hạn số tweet trả về
+          example: '2'
+        - name: page
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Trang hiển thị
+          example: '1'
+        - name: tweet_type
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Loại tweet (retweet, quote hoặc comment)
+          example: '3'
+      responses:
+        default:
+          description: Lấy tweet con thành công
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Get Tweet Children Successfully'
+                  result:
+                    type: object
+                    properties:
+                      tweets:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/TweetChild'
+      security:
+        - BearerAuth: []
+  /static/video-hls/{id}/master.m3u8:
+    get:
+      summary: Serve file m3u8
+      description: Serve file m3u8
+      tags:
+        - static
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The name of the video-hls
+          example: 'UfKNlmEYVBBZW5fFbKlPi'
+      responses:
+        default:
+          description: 'Serve file m3u8'
+  /static/video-hls/{id}/{v}/{segment}:
+    get:
+      summary: Serve file ts
+      description: Serve file ts
+      tags:
+        - static
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The name of the video-hls
+          example: 'UfKNlmEYVBBZW5fFbKlPi'
+        - name: v
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The version of the video-hls
+          example: 'v0'
+        - name: segment
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The segment of the video-hls
+          example: 'fileSequence2.ts'
+      responses:
+        default:
+          description: 'Serve file ts'
+  /bookmarks:
+    post:
+      summary: Bookmark một Tweet
+      tags:
+        - bookmarks
+      description: Cho phép người dùng bookmark một Tweet.
+      operationId: bookmarkTweet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tweet_id:
+                  type: string
+                  description: The ID of the tweet to bookmark
+                  example: '664e12bd4506fa7ec0c856f1'
+      responses:
+        default:
+          description: Bookmark a Tweet
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Bookmark successfully'
+                  result:
+                    $ref: '#/components/schemas/BookmarkResponse'
+      security:
+        - BearerAuth: []
+  /bookmarks/tweets/{tweet_id}:
+    delete:
+      summary: Unbookmark một Tweet
+      description: Cho phép người dùng unbookmark một Tweet.
+      tags:
+        - bookmarks
+      operationId: unbookmarkTweet
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          description: The ID of the tweet to unbookmark
+          schema:
+            type: string
+            example: '664e12bd4506fa7ec0c856f1'
+      responses:
+        default:
+          description: Unbookmark a Tweet
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Unbookmark successfully'
+      security:
+        - BearerAuth: []
+  /likes:
+    post:
+      summary: Like một Tweet
+      description: Cho phéo người dùng thêm 1 tweet vào danh sách yêu thích.
+      tags:
+        - likes
+      operationId: likeTweet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tweet_id:
+                  type: string
+                  description: The ID of the tweet to like
+                  example: '664e12bd4506fa7ec0c856f1'
+      responses:
+        default:
+          description: Like a Tweet
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Like successfully'
+                  result:
+                    $ref: '#/components/schemas/BookmarkResponse'
+      security:
+        - BearerAuth: []
+  /likes/tweets/{tweet_id}:
+    delete:
+      summary: Unlike một Tweet
+      description: Cho phép người dùng unlike một Tweet.
+      tags:
+        - likes
+      operationId: unlikeTweet
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          description: The ID of the tweet to unlike
+          schema:
+            type: string
+            example: '664e12bd4506fa7ec0c856f1'
+      responses:
+        default:
+          description: Unlike a Tweet
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Unlike successfully'
+      security:
+        - BearerAuth: []
+  /search:
+    get:
+      summary: Search
+      description: Searches for resources with optional pagination.
+      tags:
+        - search
+      operationId: search
+      parameters:
+        - name: limit
+          in: query
+          required: true
+          description: Limit the number of results
+          schema:
+            type: string
+            example: '10'
+        - name: page
+          in: query
+          required: true
+          description: Page number for pagination
+          schema:
+            type: string
+            example: 1
+        - name: content
+          in: query
+          required: true
+          description: Search query
+          schema:
+            type: string
+            example: 'tweet'
+        - name: people_follow
+          in: query
+          required: false
+          description: Followed people or Anyone
+          schema:
+            type: string
+            example: '0'
+        - name: media_type
+          in: query
+          required: false
+          description: Type of media (Image or Video)
+          schema:
+            type: string
+            example: 'video'
+      responses:
+        default:
+          description: Search
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Search Successfully'
+                  result:
+                    type: object
+                    properties:
+                      tweets:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/TweetChild'
+                      limit:
+                        type: number
+                        example: 10
+                      page:
+                        type: number
+                        example: 1
+                      totalPage:
+                        type: number
+                        example: 1
+      security:
+        - BearerAuth: []
+  /medias/upload-image:
+    post:
+      summary: Upload image
+      description: Upload image
+      tags:
+        - medias
+      operationId: uploadImage
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        default:
+          description: Upload image
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Upload image successfully'
+                  result:
+                    properties:
+                      url:
+                        type: string
+                        example: 'https://twitter-clone-2024-3005-ap-southeast-1.s3.ap-southeast-1.amazonaws.com/images/cdd16000ba8ccb01391539c00.jpg'
+                      type:
+                        $ref: '#/components/schemas/MediaType'
+      security:
+        - BearerAuth: []
+  /medias/upload-video:
+    post:
+      summary: Upload video
+      description: Upload video
+      tags:
+        - medias
+      operationId: uploadVideo
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                video:
+                  type: string
+                  format: binary
+      responses:
+        default:
+          description: Upload video successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Upload video successfully'
+                  result:
+                    properties:
+                      url:
+                        type: string
+                        example: 'https://twitter-clone-2024-3005-ap-southeast-1.s3.ap-southeast-1.amazonaws.com/videos/mLntLdfhbchVPzTFwnGJL.mp4'
+                      type:
+                        $ref: '#/components/schemas/MediaType'
+      security:
+        - BearerAuth: []
+  /medias/upload-video-hls:
+    post:
+      summary: Upload video hls
+      description: Upload video hls
+      tags:
+        - medias
+      operationId: uploadVideoHls
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                video:
+                  type: string
+                  format: binary
+      responses:
+        default:
+          description: Upload video hls successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Upload video hls successfully'
+                  result:
+                    properties:
+                      url:
+                        type: string
+                        example: 'https://twitter-clone-2024-3005-ap-southeast-1.s3.ap-southeast-1.amazonaws.com/videos/mLntLdfhbchVPzTFwnGJL.mp4'
+                      type:
+                        $ref: '#/components/schemas/MediaType'
+      security:
+        - BearerAuth: []
+  /medias/video-status/{id}:
+    get:
+      summary: Lấy video status
+      description: Lưu ý chỉ áp dụng cho upload hls bởi vì quá trính encode video lâu, ta sẽ dùng route này để check status video
+      tags:
+        - medias
+      operationId: getVideoStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: name video
+          example: 'UfKNlmEYVBBZW5fFbKlPi'
+      responses:
+        default:
+          description: Lấy video status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Get video status success'
+                  result:
+                    $ref: '#/components/schemas/VideoStatus'
+      security:
+        - BearerAuth: []
+  /conversations/receiver/{receiver_id}:
+    get:
+      summary: Lấy đoạn chat giữa 2 người
+      description: Lấy đoạn chat giữa 2 người
+      tags:
+        - conversations
+      parameters:
+        - name: receiver_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID của người nhận
+          example: '66560400389d949535854b02'
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Số tin nhắn trả về
+          example: 10
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Trang hiển thị
+          example: 1
+      responses:
+        default:
+          description: Lấy đoạn chat giữa 2 người
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Get conversations successfully'
+                  result:
+                    type: object
+                    properties:
+                      conversations:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Conversation'
+                      limit:
+                        type: integer
+                        example: 10
+                      page:
+                        type: integer
+                        example: 1
+                      totalPage:
+                        type: integer
+                        example: 9
+      security:
+        - BearerAuth: []
 
 components:
   schemas:
+    Conversation:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Unique identifier for the conversation
+          example: '666d91ecf67cf43a27a36e33'
+        content:
+          type: string
+          description: Content of the message
+          example: 'oke'
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the conversation was created
+          example: '2024-06-15T13:06:52.626Z'
+        updated_at:
+          type: string
+          format: date-time
+          description: Timestamp when the conversation was last updated
+          example: '2024-06-15T13:06:52.626Z'
+        receiver_id:
+          type: string
+          description: ID of the receiver
+          example: '66560400389d949535854b02'
+        sender_id:
+          type: string
+          description: ID of the sender
+          example: '6655ffc876734a5aeb8c998e'
     LoginBody:
       type: object
       properties:
         email:
           type: string
-          example: yugivip277@gmail.com
+          example: yugivip277+1@gmail.com
         password:
           type: string
           example: Nguyen.123
@@ -799,6 +1301,58 @@ components:
           type: integer
           description: The number of quotes of the tweet
           example: 0
+    BookmarkResponse:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: MongoId
+          description: The unique identifier for the bookmark
+          example: '667a30a20c179e41b79c613a'
+        tweet_id:
+          type: string
+          description: The ID of the bookmarked tweet
+          example: '664e12bd4506fa7ec0c856f1'
+        user_id:
+          type: string
+          description: The ID of the user who bookmarked the tweet
+          example: '6655fe1ef257bdd30841c4ba'
+        created_at:
+          type: string
+          format: ISO8601
+          description: The timestamp when the bookmark was created
+          example: '2024-06-25T02:51:14.262Z'
+    VideoStatus:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Unique identifier
+          example: 665d8e8ba3b5209d43096052
+        name:
+          type: string
+          description: Name of the object
+          example: UfKNlmEYVBBZW5fFbKlPi
+        status:
+          $ref: '#/components/schemas/EncodingStatus'
+        message:
+          type: string
+          description: Message associated with the object
+          example: ''
+        created_at:
+          type: string
+          format: ISO8601
+          description: Creation timestamp
+          example: 2024-06-03T09:36:11.012Z
+        updated_at:
+          type: string
+          format: ISO8601
+          description: Last update timestamp
+          example: 2024-06-03T09:36:56.209Z
+    EncodingStatus:
+      type: number
+      enum: [Pending, Processing, Success, Failed]
+      example: 0
 
   securitySchemes:
     BearerAuth:

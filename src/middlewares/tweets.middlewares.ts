@@ -292,7 +292,7 @@ export const audienceValidator = wrapRequestHandler(async (req: Request, res: Re
 
     //Kiểm tra người xem có nằm trong twitter_circle của tác giả không
     const { user_id } = req.decoded_authorization as TokenPayload
-    const isInTwitterCircle = author.twitter_circle.some((user_circle_id) => user_circle_id.equals(user_id))
+    const isInTwitterCircle = author.twitter_circle?.some((user_circle_id) => user_circle_id.equals(user_id))
     if (!author._id.equals(user_id) && !isInTwitterCircle) {
       throw new ErrorWithStatus({
         status: HTTP_STATUS.FORBIDDEN,

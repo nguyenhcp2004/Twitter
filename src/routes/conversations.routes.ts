@@ -7,10 +7,11 @@ import { wrapRequestHandler } from '~/utils/handlers'
 const conversationsRouter = Router()
 
 /**
- * Description: Like Tweet
- * Path: /
+ * Description: Get Conversation between 2 users
+ * Path: /receiver/:receiver_id
  * Method: POST
- * Body: { tweet_id : string }
+ * Params: { receiver_id : string }
+ * Query: { limit: number, page: number}
  * Headers: { Authorization: Bearer <access_token> }
  */
 conversationsRouter.get(
