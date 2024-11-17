@@ -4,6 +4,7 @@ info:
   version: 1.0.11
 servers:
   - url: http://localhost:4000
+  - url: https://api-nguyenhuynh.site
 tags:
   - name: users
     description: Các API liên quan đến user
